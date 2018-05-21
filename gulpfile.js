@@ -2,43 +2,42 @@ const gulp = require('gulp');
 const plugins = require('gulp-load-plugins');
 const $ = plugins();
 
-
-gulp.task('lint', () =>
-    gulp.src(['**/*.js', '!node_modules/**', '!coverage/**'])
+gulp.task('eslint', () =>
+    gulp.src(['**/*.js', '!node_modules/**', '!coverage/**', '!dist/**'])
         .pipe($.eslint())
         .pipe($.eslint.format())
         .pipe($.eslint.failAfterError())
 );
 
 gulp.task('mocha', () =>
-    gulp.src('app/**/*.js')
+    gulp.src('src/**/*.js')
         .pipe($.istanbul())
-        .on('finish', () => {
-            return gulp.src('test/**/*.test.js')
+        .on('finish',
+            () => gulp.src('test/**/*.test.js')
                 .pipe($.mocha({reporter: 'spec'}))
                 .pipe($.istanbul.writeReports())
                 .on('error', process.exit.bind(process, 1))
-                .on('end', process.exit.bind(process));
-        })
+                .on('end', process.exit.bind(process))
+        )
 );
 
-gulp.task('server', () =>
-    $.nodemon({
-        script: './app/www/index.js',
-        env: {'NODE_ENV': process.env.NODE_ENV || 'development'},
-        ignore: ['./test/**/*.js'],
-        nodeArgs: ['--debug']
-    })
-);
+gulp.task('server', () => $.nodemon({
+    script: './',
+    env: {NODE_ENV: process.env.NODE_ENV || 'development'},
+    ignore: ['./test/**/*.js'],
+    nodeArgs: ['--inspect']
+}));
 
 gulp.task('clean:dist', () => require('del')('dist'));
 
 gulp.task('copy:dist', () =>
-    gulp.src([
-        'index.js',
-        './config/**',
-        './src/**'
-    ], {base: '.'}).pipe(gulp.dest('dist'))
+    gulp
+        .src([
+            'index.js',
+            './config/**',
+            './src/**'
+        ], {base: '.'})
+        .pipe(gulp.dest('dist'))
 );
 
 gulp.task('package', () =>
@@ -62,5 +61,5 @@ gulp.task('build:uat', ['clean:dist'], () =>
     gulp.run(['dist'])
 );
 
-gulp.task('test', ['lint', 'mocha']);
+gulp.task('test', ['eslint']);
 gulp.task('dev', ['server']);

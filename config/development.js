@@ -1,10 +1,8 @@
 const Config = require('./config');
 
-class Dev extends Config {
+class Development extends Config {
     static configure(app) {
         super.configure(app);
-        app.use(require('morgan')('dev'));
-
         app.use(require('cors')({
             credentials: true,
             origin: /^http:\/\/localhost/
@@ -12,4 +10,4 @@ class Dev extends Config {
     }
 }
 
-module.exports = Dev;
+module.exports = Development;
